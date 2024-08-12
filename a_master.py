@@ -119,17 +119,10 @@ def main():
         if(signal_source == 'wavegen'):
             print("Wavegen source selected...")
             print("Loading csv...")
-            import pandas as pd
-            # *** Load in custom waveforms here, if desired
-            # If you desire to read form an external source, no changes to the code are required. Simply connect the oscilliscopes to the external device. 
-            data1 = pd.read_csv(f"C:\\Users\\WEDES-1\\Desktop\\ADP-Linux\\Waveforms_Volt_65356.csv")
-            data2 = pd.read_csv(f"C:\\Users\\WEDES-1\\Desktop\\ADP-Linux\\negative.csv")
-            data1vals = pd.to_numeric(data1['Battery voltage'], downcast='float').to_list()
-            data2vals = pd.to_numeric(data2['Negative'], downcast='float').to_list()
-
-              
-
-            datas = [data1vals, data2vals]
+            from helpercsv import read_csv_column
+            data1 = read_csv_column(f".\\Waveforms_Volt_65356.csv", 'Battery voltage')
+            data2 = read_csv_column(f".\\negative.csv", 'Negative')
+            datas = [data1, data2]
 
             from WF_SDK import wavegen
             print("[REPLACE WITH BATTERY] Beginning wavegen to simulate battery wave...")
