@@ -28,25 +28,25 @@ def fft(dwf, hzRate, nSamples, data, incomingFreq, channelNumber, showGraph):
     # plt.show()
 
     iFirst = 0.0
-    iLast = .1
+    iLast = 1
     nBins = int(nSamples/2+1)
     rgdBins1 = (c_double*nBins)()
     rgdBins1_phase = (c_double*nBins)()
     dwf.FDwfSpectrumTransform(byref(rgdSamples1), nSamples, byref(rgdBins1), byref(rgdBins1_phase), nBins, c_double(iFirst), c_double(iLast))
     import math
-    sqrt2 = math.sqrt(2)
 
-    plt.plot(rgdBins1)
-    plt.show()
+    # plt.plot(rgdBins1)
+    # plt.show()
   
 
     # for i in range(nBins): 
     #     rgdBins1[i] = 20.0*math.log10(rgdBins1[i]/sqrt2) # to dBV
     
 
-
+    threshold = .003
+    print(threshold)
     for i in range(nBins): 
-        if rgdBins1[i]<.002 : rgdBins1_phase[i] = 0  # mask phase at low magnitude
+        if rgdBins1[i]<threshold: rgdBins1_phase[i] = 0  # mask phase at low magnitude
         else: rgdBins1_phase[i] = rgdBins1_phase[i]*180.0/math.pi # radian to degree
         if rgdBins1_phase[i] < 0 : rgdBins1_phase[i] = 180.0+rgdBins1_phase[i] 
         

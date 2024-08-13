@@ -23,9 +23,19 @@ def open_uart():
     print("This isn't set up yet. Implement this later")
     raise Exception("Uart option selected, but not yet set up. Set to none instead.")
     
-def send_message():
+
+
+
+def send_message(method):
     print("This isn't set up yet")
     raise Exception("This isn't set up yet. Set tms method to none")
+
+
+
+
+
+def send_uart_method(message):
+    print("A")
 
 
 

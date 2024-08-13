@@ -120,8 +120,8 @@ def main():
             print("Wavegen source selected...")
             print("Loading csv...")
             from helpercsv import read_csv_column
-            data1 = read_csv_column(f".\\Waveforms_Volt_65356.csv", 'Battery voltage')
-            data2 = read_csv_column(f".\\negative.csv", 'Negative')
+            data1 = read_csv_column(f".\\negative_volt.csv", 'Negative')
+            data2 = read_csv_column(f".\\Waveforms_Current_65356.csv", 'Battery current')
             datas = [data1, data2]
 
             from WF_SDK import wavegen
@@ -142,15 +142,18 @@ def main():
             print(f"Read failed for reason: {e}")
             print("Fatal error. Ending process")
             return
+
+        
+        
         
         print("Creating fft...")
+        #import alt_fft as fft
         import helper_fft as fft
         ch1_amp, ch1_phz = fft.fft(dwf, sampling_frequency, buffer_size, buffer1, list_of_frequencies[i], 1, show_graphs)
         ch2_amp, ch2_phz = fft.fft(dwf, sampling_frequency, buffer_size, buffer2, list_of_frequencies[i], 2, show_graphs)
         
 
-        sample_multiplier = int((len(ch1_amp)) / 50000)
-        print(sample_multiplier)
+        sample_multiplier = 1#int((len(ch1_amp)) / 50000)
         # Process harmonics
         for j in range(0, len(list_of_harmonics)):
             curr_harmonic = list_of_harmonics[j] * list_of_frequencies[i]

@@ -6,14 +6,16 @@ def process_harmonic(buffer_mag, buffer_phase, harmonic, frequency, sample_multi
     begin = int(sample_multiplier*(harmonic) - (search_range //2) )           #define begin as the location in the spectrum of where we will begin
     maximum = -100
     maxloc = 0
+    print(f"hey - {begin}")
 
     #print(begin)
-    import matplotlib.pyplot as plt
+    # import matplotlib.pyplot as plt
     # plt.plot(buffer_mag)
+    # plt.plot(buffer_phase)
     # plt.show()
-    plt.plot(buffer_mag[begin:(begin+(search_range))])
-    plt.plot(buffer_phase[begin:(begin+(search_range))], color='red')
-    plt.show()
+    # plt.plot(buffer_mag[begin:(begin+(search_range))])
+    # plt.plot(buffer_phase[begin:(begin+(search_range))], color='red')
+    # plt.show()
 
     for q in range(search_range):
         searchloc = ((begin+q)) #set the current search location within the spectrum
@@ -27,16 +29,16 @@ def process_harmonic(buffer_mag, buffer_phase, harmonic, frequency, sample_multi
     harmonic_magnitude = maximum
     harmonic_phase = buffer_phase[maxloc]
 
-    maximum = -100
-    for q in range(search_range):
-        searchloc = ((begin+q)) #set the current search location within the spectrum
-        int(searchloc)
-        if searchloc> len(buffer_phase):    #if our search location is outside the length of the spectrum, abort
-            continue
-        if buffer_phase[searchloc] > maximum:   #if the magnitude of the spectrum is greater than what we have seen, reset the max
-            maximum = buffer_phase[searchloc]
-            maxloc = searchloc
-    harmonic_phase = buffer_phase[maxloc]
+    # maximum = -100
+    # for q in range(search_range):
+    #     searchloc = ((begin+q)) #set the current search location within the spectrum
+    #     int(searchloc)
+    #     if searchloc> len(buffer_phase):    #if our search location is outside the length of the spectrum, abort
+    #         continue
+    #     if buffer_phase[searchloc] > maximum:   #if the magnitude of the spectrum is greater than what we have seen, reset the max
+    #         maximum = buffer_phase[searchloc]
+    #         maxloc = searchloc
+    # harmonic_phase = buffer_phase[maxloc]
 
     print(harmonic_magnitude)
     print(harmonic_phase)

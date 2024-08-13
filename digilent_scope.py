@@ -116,6 +116,7 @@ def readChannels(hdwf, dwf, num_samples):
     dwf.FDwfAnalogOutReset(hdwf, c_int(0))
 
 
+
     #print("Recording done")
     if fLost:
         print("Samples were lost! Reduce frequency")
