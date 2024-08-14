@@ -58,9 +58,7 @@ class HarmonicList:
     def export(self, filename : str):
         if not filename.endswith(".csv"):
             filename += ".csv"
-        if not filename.startswith(".\\"):
-            filename = ".\\" + filename
-
+    
         print(f"saving to {filename}")
 
         current = self.head
