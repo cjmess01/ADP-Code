@@ -215,6 +215,10 @@ def main():
     ls.export(".\\mydata.csv")
     print("Saved to mydata.csv. Process completed. ")
     digilent_led.turnOffLight(hdwf, dwf, 15)
+
+    
+    digilent_led.flashSuccess(hdwf,dwf)
+
     return
 
 
