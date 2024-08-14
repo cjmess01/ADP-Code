@@ -6,7 +6,7 @@ def process_harmonic(buffer_mag, buffer_phase, harmonic, frequency, sample_multi
     begin = int(sample_multiplier*(harmonic) - (search_range //2) )           #define begin as the location in the spectrum of where we will begin
     maximum = -100
     maxloc = 0
-    print(f"hey - {begin}")
+
 
     #print(begin)
     # import matplotlib.pyplot as plt
@@ -39,10 +39,10 @@ def process_harmonic(buffer_mag, buffer_phase, harmonic, frequency, sample_multi
     #         maximum = buffer_phase[searchloc]
     #         maxloc = searchloc
     # harmonic_phase = buffer_phase[maxloc]
-
+    print(f"Freq: {frequency}\nHarm: {harmonic}")
     print(harmonic_magnitude)
     print(harmonic_phase)
-
+    print("")
 
     return harmonic_magnitude, harmonic_phase
 
