@@ -73,3 +73,17 @@ def lightLed(dio : int, purpose : str):
         return inner
     return decorator
 
+def flashSuccess(hdwf,dwf):
+    dwf.FDwfDigitalIOOutputSet(hdwf, c_int(0x0000)) 
+    dwf.FDwfDigitalIOOutputEnableSet(hdwf, c_int(0x0010))
+    dwf.FDwfDigitalIOConfigure(hdwf)
+    for i in range(10):
+        dwf.FDwfDigitalIOOutputSet(hdwf, c_int(0x0010)) 
+        dwf.FDwfDigitalIOConfigure(hdwf)
+        time.sleep(1)
+        dwf.FDwfDigitalIOOutputSet(hdwf, c_int(0x0000)) 
+        dwf.FDwfDigitalIOConfigure(hdwf)
+        time.sleep(1)
+
+    return
+
