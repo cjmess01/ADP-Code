@@ -1,16 +1,13 @@
-from WF_SDK import device, scope, wavegen, tools, error   # import instruments
 
-def create_FFT(buffer, frequency_start, frequency_stop,samplingFreq):
+import digilent_led
 
-    spectrum_buff = tools.spectrum(buffer, tools.window.rectangular, samplingFreq, frequency_start, frequency_stop) #voltage amplitude spectrum
-    spectrum_p_buff = tools.spectrumphase(buffer, tools.window.rectangular, scope.data.sampling_frequency, frequency_start, frequency_stop)   #voltage phase spectrum
-    return spectrum_buff, spectrum_p_buff
 
 from dwfconstants import * 
 from ctypes import *
 import matplotlib.pyplot as plt
 import numpy
-def fft(dwf, hzRate, nSamples, data, incomingFreq, channelNumber, showGraph):
+@digilent_led.lightLed(1,"FFT")
+def fft(hdwf, dwf, hzRate, nSamples, data, incomingFreq, channelNumber, showGraph):
     hzTop = hzRate/2.0
     rgdWindow = (c_double*nSamples)()
     vBeta = c_double(1.0) # used only for Kaiser window
@@ -44,7 +41,6 @@ def fft(dwf, hzRate, nSamples, data, incomingFreq, channelNumber, showGraph):
     
 
     threshold = .003
-    print(threshold)
     for i in range(nBins): 
         if rgdBins1[i]<threshold: rgdBins1_phase[i] = 0  # mask phase at low magnitude
         else: rgdBins1_phase[i] = rgdBins1_phase[i]*180.0/math.pi # radian to degree

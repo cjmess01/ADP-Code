@@ -6,15 +6,20 @@ from time import sleep
 import matplotlib.pyplot as plt
 import numpy as np
 
+import digilent_led as dig_led
+
 '''
 Main function that opens, reads, and closes from osc.
 '''
+@dig_led.lightLed(0, "oscilliscope reading")
 def perform_simultaneous_reading(hdwf, dwf, time_to_sample, sampling_frequency, buffer_size):
     openScope(hdwf, dwf, time_to_sample, sampling_frequency)
     sleep(1)
     buff1, buff2 = readChannels(hdwf, dwf, buffer_size)
 
     return buff1, buff2
+
+
 
 
 
