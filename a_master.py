@@ -6,7 +6,7 @@ import digilent_scope as dig_scope
 import tms_communication as tms_communication
 from structure_node import DataNode
 import helper_graph as graph
-
+import digilent_led as digilent_led
 
 def main():
     # Set constants here
@@ -15,7 +15,7 @@ def main():
     Keep frequencies between 1-5000
     At 5000, only use 5 harmonics, max. Minimum harmonics is always 1
     '''
-    list_of_frequencies = [100]
+    list_of_frequencies = [100,200,300]
     '''
     Number of harmonics per frequency
     '''
@@ -42,14 +42,6 @@ def main():
     # If signal_source is wavegen, include the name of the csv to read from
     wavegen_csv_source = ""
 
-
-    '''
-    Minimum revolutions for a signal
-    desc: Minimum number of revolutions to allow from oscilliscope. Usually leave this alone
-    note: Ensure this is a number, ie 10. Do not put quotes around it
-    '''
-    min_revolutions = 10
-
     '''
     Show graphs
     note: regardless of setting, graphs will always be saved to graph folder
@@ -58,12 +50,9 @@ def main():
     'display' - enable plt.show commands to see graphs as they are generated
     'silent'  - do not display graphs  
     '''
-    show_graphs = 'display'
-
-
-
+    show_graphs = 'silent'
+   
     print("Beginning Process...")
-
     # Initializing Digilent communication
     try:
         print("Opening Digilent...")
@@ -72,8 +61,9 @@ def main():
         print(f"Failed to connect to ADP3450 for reason: {e}")
         print("Fatal error encountered. Ending process")
         return
-    
-    
+    # Process light
+    digilent_led.turnOnLight(hdwf, dwf, 15)
+
     # Initializing TMS communication
     connected_to_tms = False
     try:
@@ -90,6 +80,7 @@ def main():
     except Exception as e:
         print(f"Failed to connect to tms for reason: {e}")
         print("Fatal error encountered. Ending process")
+        digilent_led.forceLightsOff(hdwf,dwf)
         return
     
     # Create data array
@@ -108,6 +99,7 @@ def main():
         except Exception as e:
             print(f"Failed to send message to tms for reason: {e}")
             print("Fatal error encountered. Ending process")
+            digilent_led.forceLightsOff(hdwf,dwf)
             return
 
     sleep(2)
@@ -120,8 +112,8 @@ def main():
             print("Wavegen source selected...")
             print("Loading csv...")
             from helpercsv import read_csv_column
-            data1 = read_csv_column(f".\\negative_volt.csv", 'Negative')
-            data2 = read_csv_column(f".\\Waveforms_Current_65356.csv", 'Battery current')
+            data1 = read_csv_column(f".\\Waveforms_Volt_65356.csv", 'Battery voltage')
+            data2 = read_csv_column(f".\\negative_current.csv", 'Negative')
             datas = [data1, data2]
 
             from WF_SDK import wavegen
@@ -141,6 +133,7 @@ def main():
         except Exception as e:
             print(f"Read failed for reason: {e}")
             print("Fatal error. Ending process")
+            digilent_led.forceLightsOff(hdwf,dwf)
             return
 
         
@@ -149,15 +142,16 @@ def main():
         print("Creating fft...")
         #import alt_fft as fft
         import helper_fft as fft
-        ch1_amp, ch1_phz = fft.fft(dwf, sampling_frequency, buffer_size, buffer1, list_of_frequencies[i], 1, show_graphs)
-        ch2_amp, ch2_phz = fft.fft(dwf, sampling_frequency, buffer_size, buffer2, list_of_frequencies[i], 2, show_graphs)
+        ch1_amp, ch1_phz = fft.fft(hdwf, dwf, sampling_frequency, buffer_size, buffer1, list_of_frequencies[i], 1, show_graphs)
+        ch2_amp, ch2_phz = fft.fft(hdwf, dwf, sampling_frequency, buffer_size, buffer2, list_of_frequencies[i], 2, show_graphs)
         
 
         sample_multiplier = 1#int((len(ch1_amp)) / 50000)
         # Process harmonics
+        digilent_led.turnOnLight(hdwf, dwf, 2)
         for j in range(0, len(list_of_harmonics)):
             curr_harmonic = list_of_harmonics[j] * list_of_frequencies[i]
-            print("Searching harmonic " + str(curr_harmonic))
+            
 
             from helper_process_harmonic import process_harmonic
             harmonic_v_magnitude, harmonic_v_phase = process_harmonic(ch1_amp, ch1_phz, curr_harmonic, list_of_frequencies[i], sample_multiplier)
@@ -168,6 +162,7 @@ def main():
             curr_node.name(list_of_frequencies[i], curr_harmonic)
             curr_node.set_data(harmonic_v_magnitude, harmonic_v_phase, harmonic_i_magnitude, harmonic_i_phase)
             harmonic_matrix[i,j] = curr_node
+        digilent_led.turnOffLight(hdwf, dwf, 2)
 
         # Send sig nal to begin pertubation
         if(connected_to_tms):
@@ -177,11 +172,14 @@ def main():
             except Exception as e:
                 print(f"Failed to send message to tms for reason: {e}")
                 print("Fatal error encountered. Ending process")
+                digilent_led.forceLightsOff(hdwf,dwf)
                 return
         
-        input("Next pertubation")
+        # input("Next pertubation")
         sleep(2)
+
     
+    print("Beginning data processing...")
     from helper_linkedlist import HarmonicList
     import matplotlib.pyplot as plt
     ls = HarmonicList()
@@ -210,44 +208,14 @@ def main():
     z_reals, z_imgs = ls.z_lists()
     points = list(zip(z_reals, z_imgs))
     x,y = zip(*points)
-    print(x)
-    print(y)
+    # print(x)
+    # print(y)
     plt.plot(x,y, '-o')
     plt.show()
     ls.export(".\\mydata.csv")
-
+    print("Saved to mydata.csv. Process completed. ")
+    digilent_led.turnOffLight(hdwf, dwf, 15)
     return
-
-
-        
-
-
-        
-
-        
-
-            
-        
-
-
-        
-
-        
-
-
-        
-        
-    
-
-    
-
-
-
-
- 
-
-
-
 
 
 
