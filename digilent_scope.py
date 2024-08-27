@@ -26,7 +26,7 @@ def new_presets(incoming_freq):
         time_to_sample = 40
         sample_multiplier = 40
     if(incoming_freq >= 1):
-        freq = 100000
+        freq = 1000000
         time_to_sample = 10
         sample_multiplier = 10
     if(incoming_freq >= 10):
@@ -34,7 +34,7 @@ def new_presets(incoming_freq):
         time_to_sample = 1
         sample_multiplier = 1
     buffer_size = int(freq * time_to_sample)
-
+    buffer_size = 1000000
     return freq, time_to_sample, buffer_size, sample_multiplier
 
 def get_recommended_presets(incoming_freq):
@@ -92,8 +92,9 @@ def openScope(hdwf, dwf, recording_time_in_seconds, sampling_rate):
 
 def readChannels(hdwf, dwf, num_samples):
     rgdSamples1 = (c_double * num_samples)()
+    print("allocated 1")
     rgdSamples2 = (c_double * num_samples)()
-
+    print("allocated 2")
     sts = c_byte()
     cAvailable = c_int()
     cLost = c_int()
@@ -104,7 +105,7 @@ def readChannels(hdwf, dwf, num_samples):
     dwf.FDwfAnalogInConfigure(hdwf, c_int(0), c_int(1))
 
     cSamples = 0
-    #print('starting...')
+    print('starting...')
     while cSamples < num_samples:
         dwf.FDwfAnalogInStatus(hdwf, c_int(1), byref(sts))
         if cSamples == 0 and (sts == DwfStateConfig or sts == DwfStatePrefill or sts == DwfStateArmed) :
@@ -133,13 +134,13 @@ def readChannels(hdwf, dwf, num_samples):
        
   
 
-    #print(len(rgdSamples))
+    print(len(rgdSamples2))
 
     dwf.FDwfAnalogOutReset(hdwf, c_int(0))
 
 
 
-    #print("Recording done")
+    print("Recording done")
     if fLost:
         print("Samples were lost! Reduce frequency")
     if  fCorrupted:
