@@ -15,11 +15,11 @@ def main():
     Keep frequencies between 1-5000
     At 5000, only use 5 harmonics, max. Minimum harmonics is always 1
     '''
-    list_of_frequencies = [100,200,300]
+    list_of_frequencies = [.2]
     '''
     Number of harmonics per frequency
     '''
-    num_harmonics = 10
+    num_harmonics = 9
 
     '''
     TMS communication method
@@ -50,7 +50,7 @@ def main():
     'display' - enable plt.show commands to see graphs as they are generated
     'silent'  - do not display graphs  
     '''
-    show_graphs = 'silent'
+    show_graphs = 'display'
    
     print("Beginning Process...")
     # Initializing Digilent communication
@@ -123,7 +123,7 @@ def main():
             sleep(1)
 
         print("Preparing to read frequency "+ str(list_of_frequencies[i]) + "Hz...")
-        sampling_frequency, time_to_sample, buffer_size = dig_scope.get_recommended_presets(list_of_frequencies[i])
+        sampling_frequency, time_to_sample, buffer_size, sample_multiplier = dig_scope.new_presets(list_of_frequencies[i])
         print(f"Minimum sample time is {time_to_sample} seconds...")
         print(f"Sampling frequency is {sampling_frequency}...")
         print(f"Buffer size is {buffer_size}")
@@ -145,13 +145,14 @@ def main():
         ch1_amp, ch1_phz = fft.fft(hdwf, dwf, sampling_frequency, buffer_size, buffer1, list_of_frequencies[i], 1, show_graphs)
         ch2_amp, ch2_phz = fft.fft(hdwf, dwf, sampling_frequency, buffer_size, buffer2, list_of_frequencies[i], 2, show_graphs)
         
-
-        sample_multiplier = 1#int((len(ch1_amp)) / 50000)
+        print(f"Len of buffer: {len(ch1_amp)}")
+        
         # Process harmonics
         digilent_led.turnOnLight(hdwf, dwf, 2)
         for j in range(0, len(list_of_harmonics)):
-            curr_harmonic = list_of_harmonics[j] * list_of_frequencies[i]
             
+            curr_harmonic = list_of_harmonics[j] * list_of_frequencies[i]
+            print(f"Searching for harmonic: {curr_harmonic}")
 
             from helper_process_harmonic import process_harmonic
             harmonic_v_magnitude, harmonic_v_phase = process_harmonic(ch1_amp, ch1_phz, curr_harmonic, list_of_frequencies[i], sample_multiplier)
@@ -216,8 +217,9 @@ def main():
     print("Saved to mydata.csv. Process completed. ")
     digilent_led.turnOffLight(hdwf, dwf, 15)
 
-    
+
     digilent_led.flashSuccess(hdwf,dwf)
+    
 
     return
 
@@ -227,3 +229,4 @@ def main():
 if __name__ == '__main__':
 
     main()
+    
