@@ -20,14 +20,31 @@ def perform_simultaneous_reading(hdwf, dwf, time_to_sample, sampling_frequency, 
     return buff1, buff2
 
 
+def new_presets(incoming_freq):
+    if(incoming_freq >= .1):
+        freq = 1000000
+        time_to_sample = 40
+        sample_multiplier = 40
+    if(incoming_freq >= 1):
+        freq = 1000000
+        time_to_sample = 10
+        sample_multiplier = 10
+    if(incoming_freq >= 10):
+        freq = 2000000
+        time_to_sample = 1
+        sample_multiplier = 1
+    buffer_size = int(freq * time_to_sample)
 
-
+    return freq, time_to_sample, buffer_size, sample_multiplier
 
 def get_recommended_presets(incoming_freq):
     freq = 1000000
     time_to_sample = 20
     buffer_size = 10000000
-
+    if(incoming_freq >=.1):
+        freq = 1000000
+        time_to_sample = 25
+        buffer_size = 10000000
     if(incoming_freq >= 1):
         freq = 1000000
         time_to_sample = 10
@@ -38,7 +55,7 @@ def get_recommended_presets(incoming_freq):
         buffer_size = 1000000
   
 
-    return freq, time_to_sample, buffer_size
+    return freq, time_to_sample, buffer_size, 1
 
 
 
@@ -87,12 +104,11 @@ def readChannels(hdwf, dwf, num_samples):
     dwf.FDwfAnalogInConfigure(hdwf, c_int(0), c_int(1))
 
     cSamples = 0
-    
+    #print('starting...')
     while cSamples < num_samples:
         dwf.FDwfAnalogInStatus(hdwf, c_int(1), byref(sts))
         if cSamples == 0 and (sts == DwfStateConfig or sts == DwfStatePrefill or sts == DwfStateArmed) :
             # Acquisition not yet started.
-            
             continue
 
         dwf.FDwfAnalogInStatusRecord(hdwf, byref(cAvailable), byref(cLost), byref(cCorrupted))
@@ -111,9 +127,10 @@ def readChannels(hdwf, dwf, num_samples):
             cAvailable = c_int(num_samples-cSamples)
     
         dwf.FDwfAnalogInStatusData(hdwf, c_int(0), byref(rgdSamples1, sizeof(c_double)*cSamples), cAvailable) # get channel 1 data
-
         dwf.FDwfAnalogInStatusData(hdwf, c_int(1), byref(rgdSamples2, sizeof(c_double)*cSamples), cAvailable) # get channel 2 data
+
         cSamples += cAvailable.value
+       
   
 
     #print(len(rgdSamples))
