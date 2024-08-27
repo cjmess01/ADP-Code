@@ -15,7 +15,7 @@ def main():
     Keep frequencies between 1-5000
     At 5000, only use 5 harmonics, max. Minimum harmonics is always 1
     '''
-    list_of_frequencies = [.2]
+    list_of_frequencies = [.1,1,5,10,50,100,1000]
     '''
     Number of harmonics per frequency
     '''
