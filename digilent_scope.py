@@ -22,11 +22,11 @@ def perform_simultaneous_reading(hdwf, dwf, time_to_sample, sampling_frequency, 
 
 def new_presets(incoming_freq):
     if(incoming_freq >= .1):
-        freq = 1000000
+        freq = 100000
         time_to_sample = 40
         sample_multiplier = 40
     if(incoming_freq >= 1):
-        freq = 1000000
+        freq = 100000
         time_to_sample = 10
         sample_multiplier = 10
     if(incoming_freq >= 10):
