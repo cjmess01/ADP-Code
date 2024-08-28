@@ -56,6 +56,8 @@ def forceLightsOff(hdwf, dwf):
 
 
 # DIO 0 is 0. DIO 1 is 1. Etc.
+# ONLY USE THIS ONE IF YOU have returning two values. Or else, it won't work. 
+# Use lightLedOneArg instead. 
 def lightLed(dio : int, purpose : str):
 
     def decorator(func):
@@ -65,6 +67,22 @@ def lightLed(dio : int, purpose : str):
                 buffer1, buffer2 = func(*argv)
                 turnOffLight(argv[0], argv[1], dio)
                 return buffer1, buffer2
+            except Exception as e:
+                print(f"Error while performing the function: {purpose}")
+                print(e)
+                forceLightsOff(argv[0], argv[1])
+                exit()
+        return inner
+    return decorator
+
+def lightLedOneArg(dio : int, purpose : str):
+    def decorator(func):
+        def inner(*argv, **kwargs):
+            try:
+                turnOnLight(argv[0], argv[1], dio)
+                buffer1 = func(*argv)
+                turnOffLight(argv[0], argv[1], dio)
+                return buffer1
             except Exception as e:
                 print(f"Error while performing the function: {purpose}")
                 print(e)

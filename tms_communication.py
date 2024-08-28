@@ -24,7 +24,7 @@ def open_uart(hdwf, dwf):
 
 
 # Send message as a python string, ie 'message'
-@dig_led.lightLed(5, "Speaking")
+@dig_led.lightLedOneArg(5, "Speaking")
 def send_message(hdwf, dwf, message):
 
     process_string = lambda message : message.encode() + b'\r\n'
@@ -35,9 +35,10 @@ def send_message(hdwf, dwf, message):
     print("Sending on TX for 10 seconds...")
     dwf.FDwfDigitalUartTx(hdwf, rgTX, c_int(sizeof(rgTX)-1)) # send text, trim zero ending
     time.sleep(1)
+    return 1
 
 
-@dig_led.lightLed(6, "Listening")
+@dig_led.lightLedOneArg(6, "Listening")
 def listen(hdwf, dwf):
     time.sleep(2)
     cRX = c_int(0)
@@ -53,6 +54,8 @@ def listen(hdwf, dwf):
             print(rgRX.value.decode(), end = '', flush=True)
         if fParity.value != 0:
             print("Parity error {}".format(fParity.value))
+    return rgRX.value.decode()
+        
 
 
 
