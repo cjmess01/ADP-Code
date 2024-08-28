@@ -1,5 +1,5 @@
 from time import sleep
-from digilent_led import lightLed
+import digilent_led as dig_led
 
 from ctypes import *
 import time
@@ -24,7 +24,7 @@ def open_uart(hdwf, dwf):
 
 
 # Send message as a python string, ie 'message'
-lightLed(5, "Speaking")
+@dig_led.lightLed(5, "Speaking")
 def send_message(hdwf, dwf, message):
 
     process_string = lambda message : message.encode() + b'\r\n'
@@ -34,11 +34,12 @@ def send_message(hdwf, dwf, message):
     #raise Exception("This isn't set up yet. Set tms method to none")
     print("Sending on TX for 10 seconds...")
     dwf.FDwfDigitalUartTx(hdwf, rgTX, c_int(sizeof(rgTX)-1)) # send text, trim zero ending
+    time.sleep(1)
 
 
-
-lightLed(6, "Listening")
+@dig_led.lightLed(6, "Listening")
 def listen(hdwf, dwf):
+    time.sleep(2)
     cRX = c_int(0)
     fParity = c_int(0)
     rgRX = create_string_buffer(8193)
