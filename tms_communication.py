@@ -11,8 +11,8 @@ def open_uart(hdwf, dwf):
 
     # configure the I2C/TWI, default settings
     dwf.FDwfDigitalUartRateSet(hdwf, c_double(9600)) # 9.6kHz
-    dwf.FDwfDigitalUartTxSet(hdwf, c_int(15)) # TX = DIO-15
-    dwf.FDwfDigitalUartRxSet(hdwf, c_int(14)) # RX = DIO-14
+    dwf.FDwfDigitalUartTxSet(hdwf, c_int(8)) # TX = DIO-15
+    dwf.FDwfDigitalUartRxSet(hdwf, c_int(9)) # RX = DIO-14
     dwf.FDwfDigitalUartBitsSet(hdwf, c_int(8)) # 8 bits
     dwf.FDwfDigitalUartParitySet(hdwf, c_int(0)) # 0 no parity, 1 even, 2 odd, 3 mark (high), 4 space (low)
     dwf.FDwfDigitalUartStopSet(hdwf, c_double(1)) # 1 bit stop length
@@ -24,17 +24,24 @@ def open_uart(hdwf, dwf):
 
 
 # Send message as a python string, ie 'message'
+lightLed(5, "Speaking")
 def send_message(hdwf, dwf, message):
-    cRX = c_int(0)
-    fParity = c_int(0)
+
     process_string = lambda message : message.encode() + b'\r\n'
 
     rgTX = create_string_buffer(process_string(message))
-    rgRX = create_string_buffer(8193)
+    
     #raise Exception("This isn't set up yet. Set tms method to none")
     print("Sending on TX for 10 seconds...")
     dwf.FDwfDigitalUartTx(hdwf, rgTX, c_int(sizeof(rgTX)-1)) # send text, trim zero ending
 
+
+
+lightLed(6, "Listening")
+def listen(hdwf, dwf):
+    cRX = c_int(0)
+    fParity = c_int(0)
+    rgRX = create_string_buffer(8193)
     tsec = time.perf_counter()  + 10 # receive for 10 seconds
     print("Receiving on RX...")
     while time.perf_counter() < tsec:
@@ -45,8 +52,6 @@ def send_message(hdwf, dwf, message):
             print(rgRX.value.decode(), end = '', flush=True)
         if fParity.value != 0:
             print("Parity error {}".format(fParity.value))
-
-
 
 
 
