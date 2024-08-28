@@ -8,6 +8,8 @@ from structure_node import DataNode
 import helper_graph as graph
 import digilent_led as digilent_led
 
+import gc
+
 def main():
     # Set constants here
     '''
@@ -15,7 +17,7 @@ def main():
     Keep frequencies between 1-5000
     At 5000, only use 5 harmonics, max. Minimum harmonics is always 1
     '''
-    list_of_frequencies = [.1]
+    list_of_frequencies = [.1,10,100]
     '''
     Number of harmonics per frequency
     '''
@@ -112,8 +114,8 @@ def main():
             print("Wavegen source selected...")
             print("Loading csv...")
             from helpercsv import read_csv_column
-            data1 = read_csv_column(f".\\Waveforms_Volt_65356.csv", 'Battery voltage')
-            data2 = read_csv_column(f".\\negative_current.csv", 'Negative')
+            data1 = read_csv_column(f"./Waveforms_Volt_65356.csv", 'Battery voltage')
+            data2 = read_csv_column(f"./negative_current.csv", 'Negative')
             datas = [data1, data2]
 
             from WF_SDK import wavegen
@@ -129,6 +131,7 @@ def main():
         print(f"Buffer size is {buffer_size}")
         try: 
             buffer1, buffer2 = dig_scope.perform_simultaneous_reading(hdwf, dwf, time_to_sample, sampling_frequency, buffer_size)
+            print("HEY")
             graph.raw_signal(f"{list_of_frequencies[i]}Hz_raw_signal", [buffer1, buffer2], show_graphs)
         except Exception as e:
             print(f"Read failed for reason: {e}")
@@ -177,6 +180,16 @@ def main():
                 return
         
         # input("Next pertubation")
+        del ch1_amp
+        del ch1_phz
+        del ch2_amp
+        del ch2_phz
+        del data1
+        del data2
+        del datas
+        del buffer1
+        del buffer2
+        gc.collect()
         sleep(2)
 
     
@@ -213,7 +226,7 @@ def main():
     # print(y)
     plt.plot(x,y, '-o')
     plt.show()
-    ls.export(".\\mydata.csv")
+    ls.export("./mydata.csv")
     print("Saved to mydata.csv. Process completed. ")
     digilent_led.turnOffLight(hdwf, dwf, 15)
 
