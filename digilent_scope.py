@@ -53,7 +53,7 @@ def get_recommended_presets(incoming_freq):
         freq = 1000000
         time_to_sample = 2
         buffer_size = 1000000
-  
+
 
     return freq, time_to_sample, buffer_size, 1
 
@@ -80,12 +80,12 @@ def openScope(hdwf, dwf, recording_time_in_seconds, sampling_rate):
     dwf.FDwfAnalogInAcquisitionModeSet(hdwf, acqmodeRecord)
     dwf.FDwfAnalogInFrequencySet(hdwf, hzAcq)
     dwf.FDwfAnalogInRecordLengthSet(hdwf, c_double(recording_time_in_seconds)) # -1 infinite record length
-    
 
-   
+
+
     # Notice that the third parameter below, fStart, is 0 (false)
     dwf.FDwfAnalogInConfigure(hdwf, c_int(1), c_int(0))
-    
+
     sleep(3)
 
 
@@ -113,7 +113,7 @@ def readChannels(hdwf, dwf, num_samples):
             continue
 
         dwf.FDwfAnalogInStatusRecord(hdwf, byref(cAvailable), byref(cLost), byref(cCorrupted))
-        
+
         cSamples += cLost.value
 
         if cLost.value :
@@ -126,13 +126,15 @@ def readChannels(hdwf, dwf, num_samples):
 
         if cSamples+cAvailable.value > num_samples :
             cAvailable = c_int(num_samples-cSamples)
-    
+
         dwf.FDwfAnalogInStatusData(hdwf, c_int(0), byref(rgdSamples1, sizeof(c_double)*cSamples), cAvailable) # get channel 1 data
         dwf.FDwfAnalogInStatusData(hdwf, c_int(1), byref(rgdSamples2, sizeof(c_double)*cSamples), cAvailable) # get channel 2 data
 
+        for i in range(rgdSamples2):
+            rgdSamples2[i] *= 10
         cSamples += cAvailable.value
-       
-  
+
+
 
 
 
