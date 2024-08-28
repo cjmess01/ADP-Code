@@ -1,34 +1,50 @@
-import serial
 from time import sleep
+from digilent_led import lightLed
+
+from ctypes import *
+import time
 
 
+def open_uart(hdwf, dwf):
+    cRX = c_int(0)
+    fParity = c_int(0)
 
-
-def open_serial(serial_port : str):
-    successful_connection = False
-    ser = serial.Serial(port = f'COM{serial_port}', baudrate = 9600, timeout=1)
-    for x in range(10):
-        value = ser.read(1)
-        ser.read()
-        if(value == b'r'):
-            successful_connection = True
-            break
-        print(f"Failed (Attempt {x+1})...")
-        sleep(1)
-    if(not successful_connection):
-        raise Exception("Failed to connect to TMS after 10 tries.")
-    return ser
-
-def open_uart():
-    print("This isn't set up yet. Implement this later")
-    raise Exception("Uart option selected, but not yet set up. Set to none instead.")
+    # configure the I2C/TWI, default settings
+    dwf.FDwfDigitalUartRateSet(hdwf, c_double(9600)) # 9.6kHz
+    dwf.FDwfDigitalUartTxSet(hdwf, c_int(15)) # TX = DIO-15
+    dwf.FDwfDigitalUartRxSet(hdwf, c_int(14)) # RX = DIO-14
+    dwf.FDwfDigitalUartBitsSet(hdwf, c_int(8)) # 8 bits
+    dwf.FDwfDigitalUartParitySet(hdwf, c_int(0)) # 0 no parity, 1 even, 2 odd, 3 mark (high), 4 space (low)
+    dwf.FDwfDigitalUartStopSet(hdwf, c_double(1)) # 1 bit stop length
+    dwf.FDwfDigitalUartTx(hdwf, None, c_int(0))# initialize TX, drive with idle level
+    dwf.FDwfDigitalUartRx(hdwf, None, c_int(0), byref(cRX), byref(fParity))# initialize RX reception
+    time.sleep(1)
+    
     
 
 
+# Send message as a python string, ie 'message'
+def send_message(hdwf, dwf, message):
+    cRX = c_int(0)
+    fParity = c_int(0)
+    process_string = lambda message : message.encode() + b'\r\n'
 
-def send_message(method):
-    print("This isn't set up yet")
-    raise Exception("This isn't set up yet. Set tms method to none")
+    rgTX = create_string_buffer(process_string(message))
+    rgRX = create_string_buffer(8193)
+    #raise Exception("This isn't set up yet. Set tms method to none")
+    print("Sending on TX for 10 seconds...")
+    dwf.FDwfDigitalUartTx(hdwf, rgTX, c_int(sizeof(rgTX)-1)) # send text, trim zero ending
+
+    tsec = time.perf_counter()  + 10 # receive for 10 seconds
+    print("Receiving on RX...")
+    while time.perf_counter() < tsec:
+        time.sleep(0.01)
+        dwf.FDwfDigitalUartRx(hdwf, rgRX, c_int(sizeof(rgRX)-1), byref(cRX), byref(fParity)) # read up to 8k chars at once
+        if cRX.value > 0:
+            rgRX[cRX.value] = 0 # add zero ending
+            print(rgRX.value.decode(), end = '', flush=True)
+        if fParity.value != 0:
+            print("Parity error {}".format(fParity.value))
 
 
 
