@@ -71,9 +71,9 @@ def main():
     try:
         if(tms_communication_method == "uart"):
             print("Connecting to TMS through uart pins...")
-            tms_communication.open_uart(dwf, hdwf)
+            tms_communication.open_uart(hdwf, dwf)
             connected_to_tms = True
-            tms_communication.send_message(dwf, hdwf, "hello")
+            tms_communication.send_message(hdwf, dwf, "hello")
             tms_communication.listen(hdwf, dwf)
         elif(tms_communication_method == "none"):
             print("TMS communication method set to none. Forgoing TMS communication for now...")
