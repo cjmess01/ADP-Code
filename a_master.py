@@ -29,7 +29,7 @@ def main():
     'serial' - communicate through the usb of the computer. Ensure that the tms is connected through USB to the host pc
     'uart'   - communicate through the uart pins of the digilent. Ensure the read is pin X and the write is pin X
     '''
-    tms_communication_method = 'uart'
+    tms_communication_method = 'none'
     # If tms_communication_method is serial, set a port number. If uart, you can ignore
     serial_port = '1'
 
