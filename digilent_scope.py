@@ -27,7 +27,7 @@ def new_presets(incoming_freq):
         sample_multiplier = 100
     if(incoming_freq >= 1):
         freq = 100000
-        time_to_sample = 10
+        time_to_sample = 100
         sample_multiplier = 10
     if(incoming_freq >= 10):
         freq = 1000000

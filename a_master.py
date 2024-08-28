@@ -17,7 +17,7 @@ def main():
     Keep frequencies between 1-5000
     At 5000, only use 5 harmonics, max. Minimum harmonics is always 1
     '''
-    list_of_frequencies = [.1,10,100]
+    list_of_frequencies = [.1, 1, 10,100]
     '''
     Number of harmonics per frequency
     '''
@@ -69,11 +69,7 @@ def main():
     # Initializing TMS communication
     connected_to_tms = False
     try:
-        if(tms_communication_method == 'serial'):
-            print(f"Connecting to TMS through serial port {serial_port}...")
-            tms_communication.open_serial(serial_port)
-            connected_to_tms = True
-        elif(tms_communication_method == "uart"):
+        if(tms_communication_method == "uart"):
             print("Connecting to TMS through uart pins...")
             tms_communication.open_uart()
             connected_to_tms = True
