@@ -17,11 +17,11 @@ def main():
     Keep frequencies between 1-5000
     At 5000, only use 5 harmonics, max. Minimum harmonics is always 1
     '''
-    list_of_frequencies = [.1, 1, 10,100]
+    list_of_frequencies = [100]
     '''
     Number of harmonics per frequency
     '''
-    num_harmonics = 9
+    num_harmonics = 10
 
     '''
     TMS communication method

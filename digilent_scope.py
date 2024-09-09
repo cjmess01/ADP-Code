@@ -1,3 +1,4 @@
+
 from ctypes import *
 from dwfconstants import *
 from digilent_system_functions import check_error
@@ -138,7 +139,8 @@ def readChannels(hdwf, dwf, num_samples):
 
     dwf.FDwfAnalogOutReset(hdwf, c_int(0))
 
-
+    for i in range(0, len(rgdSamples2)):
+        rgdSamples2[i] *= 10
 
     print("Recording done")
     if fLost:
