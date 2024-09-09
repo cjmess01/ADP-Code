@@ -1,6 +1,7 @@
 from time import sleep
 import numpy as np
 
+import serial
 import digilent_system_functions as dig_open
 import digilent_scope as dig_scope
 import tms_communication as tms_communication
@@ -38,7 +39,7 @@ def main():
     note: Voltage source goes to port 1, Current to port 2
     Options:
     'external' - receive both signals from an external source. Ensure that cables are connected to osc. ports 1 & 2 of the Digilent
-    'wavegen'  - generate source from the wavegen feature of digilent. Ensure that wavegen ports are hooked to osciliscope ports 
+    'wavegen'  - generate source from the wavegen feature of digilent. Ensure that wavegen ports are hooked to osciliscope ports
     '''
     signal_source = 'wavegen'
     # If signal_source is wavegen, include the name of the csv to read from
@@ -50,10 +51,10 @@ def main():
     note: Graphs will be overwritten in that folder, so make sure to save them to somewhere else if desired
     Options:
     'display' - enable plt.show commands to see graphs as they are generated
-    'silent'  - do not display graphs  
+    'silent'  - do not display graphs
     '''
     show_graphs = 'display'
-   
+
     print("Beginning Process...")
     # Initializing Digilent communication
     try:
@@ -82,7 +83,22 @@ def main():
         print("Fatal error encountered. Ending process")
         digilent_led.forceLightsOff(hdwf,dwf)
         return
-    
+
+    # Connect to MCU
+    connected_to_mcu = False
+    try:
+        ser = serial.Serial(port = 'COM13', baudrate = 9600)
+        while True:
+            value = ser.read(1)
+            print(value)
+            if(value == b'r'):
+                connected_to_mcu = True
+                print("CONNECTED TO MCU")
+                break
+            sleep(1)
+    except Exception as e:
+        print(f"Failed to connect serial for reason: {e}")
+
     # Create data array
     list_of_harmonics = [(x*2)+1 for x in range(num_harmonics)]
     print(f"Frequencies: {list_of_frequencies}")
@@ -94,7 +110,7 @@ def main():
     # Send signal to begin pertubation
     if(connected_to_tms):
         print("Sending start signal to tms...")
-        try:    
+        try:
             tms_communication.send_message()
         except Exception as e:
             print(f"Failed to send message to tms for reason: {e}")
@@ -127,7 +143,7 @@ def main():
         print(f"Minimum sample time is {time_to_sample} seconds...")
         print(f"Sampling frequency is {sampling_frequency}...")
         print(f"Buffer size is {buffer_size}")
-        try: 
+        try:
             buffer1, buffer2 = dig_scope.perform_simultaneous_reading(hdwf, dwf, time_to_sample, sampling_frequency, buffer_size)
             print("HEY")
             graph.raw_signal(f"{list_of_frequencies[i]}Hz_raw_signal", [buffer1, buffer2], show_graphs)
@@ -137,21 +153,21 @@ def main():
             digilent_led.forceLightsOff(hdwf,dwf)
             return
 
-        
-        
-        
+
+
+
         print("Creating fft...")
         #import alt_fft as fft
         import helper_fft as fft
         ch1_amp, ch1_phz = fft.fft(hdwf, dwf, sampling_frequency, buffer_size, buffer1, list_of_frequencies[i], 1, show_graphs)
         ch2_amp, ch2_phz = fft.fft(hdwf, dwf, sampling_frequency, buffer_size, buffer2, list_of_frequencies[i], 2, show_graphs)
-        
+
         print(f"Len of buffer: {len(ch1_amp)}")
-        
+
         # Process harmonics
         digilent_led.turnOnLight(hdwf, dwf, 2)
         for j in range(0, len(list_of_harmonics)):
-            
+
             curr_harmonic = list_of_harmonics[j] * list_of_frequencies[i]
             print(f"Searching for harmonic: {curr_harmonic}")
 
@@ -159,7 +175,7 @@ def main():
             harmonic_v_magnitude, harmonic_v_phase = process_harmonic(ch1_amp, ch1_phz, curr_harmonic, list_of_frequencies[i], sample_multiplier)
             harmonic_i_magnitude, harmonic_i_phase = process_harmonic(ch2_amp, ch2_phz, curr_harmonic, list_of_frequencies[i], sample_multiplier)
 
-            
+
             curr_node = DataNode()
             curr_node.name(list_of_frequencies[i], curr_harmonic)
             curr_node.set_data(harmonic_v_magnitude, harmonic_v_phase, harmonic_i_magnitude, harmonic_i_phase)
@@ -169,14 +185,14 @@ def main():
         # Send sig nal to begin pertubation
         if(connected_to_tms):
             print("Sending start signal to tms...")
-            try:    
+            try:
                 tms_communication.send_message()
             except Exception as e:
                 print(f"Failed to send message to tms for reason: {e}")
                 print("Fatal error encountered. Ending process")
                 digilent_led.forceLightsOff(hdwf,dwf)
                 return
-        
+
         # input("Next pertubation")
         del ch1_amp
         del ch1_phz
@@ -188,9 +204,13 @@ def main():
         del buffer1
         del buffer2
         gc.collect()
+
+        print("Sending message to MCU if connected and sleeping...")
+        if(connected_to_mcu):
+            ser.write(b'n')
         sleep(2)
 
-    
+
     print("Beginning data processing...")
     from helper_linkedlist import HarmonicList
     import matplotlib.pyplot as plt
@@ -202,14 +222,14 @@ def main():
         for j in range(0, len(list_of_frequencies)):
             ls.insert_in_order(harmonic_matrix.T[i,j])
     ls.print_list()
-    
+
 
     # Just clearing the plt buffer
     plt.show()
 
     _, harmonics = ls.get_freqs_and_harmonics()
     imp_mag, imp_pz = ls.get_impedance_lists()
-    
+
     plt.title("impedance magnitude")
     plt.plot(harmonics,imp_mag,'-o')
     plt.show()
@@ -230,7 +250,7 @@ def main():
 
 
     digilent_led.flashSuccess(hdwf,dwf)
-    
+
 
     return
 
@@ -240,4 +260,4 @@ def main():
 if __name__ == '__main__':
 
     main()
-    
+
